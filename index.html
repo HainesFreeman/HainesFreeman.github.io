@@ -354,10 +354,13 @@
 <h4 id="1-启动服务器-1"><a href="#1-启动服务器-1" class="headerlink" title="1- 启动服务器"></a>1- 启动服务器</h4> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apachectl start 启动</span><br><span class="line">sudo apachectl restar 重新启动</span><br><span class="line">sudo apachectl stop 停止</span><br></pre></td></tr></table></figure>
 <p> 打开终端：执行 <code>sudo apachectl start</code> 启动服务器，打开浏览器，地址栏输入：127.0.0.1,如果页面出现 it works，则代表访问成功。这也是系统默认的内容。如何让浏览器渲染自己自定义的文件呢？见下一步。</p>
 <h4 id="2-添加文件到本地服务器"><a href="#2-添加文件到本地服务器" class="headerlink" title="2- 添加文件到本地服务器"></a>2- 添加文件到本地服务器</h4><p> 系统Apache服务器的默认的文件地址是： <code>/Library/WebServer/Documents</code><br> 添加自己的文件（如下图画红框处）到此目录下，注意替换掉原来的index.html文件，这是默认的入口文件。<br> <img src="http://wx1.sinaimg.cn/mw690/0060lm7Tly1ftu7dw6scvj31kw0tewlk.jpg" alt="blockchain" title="服务器文件目录"></p>
-<h4 id="3-查看自定义效果-1"><a href="#3-查看自定义效果-1" class="headerlink" title="3- 查看自定义效果"></a>3- 查看自定义效果</h4><p> 打开浏览器，地址栏输入：127.0.0.1，如下图所示：<br> <img src="http://wx3.sinaimg.cn/mw690/0060lm7Tly1ftu7y5qjwdj31kw0mt785.jpg" alt="blockchain" title="自定义文件预览图"></p>
+<h4 id="3-查看自定义效果-1"><a href="#3-查看自定义效果-1" class="headerlink" title="3- 查看自定义效果"></a>3- 查看自定义效果</h4><p> 打开浏览器，地址栏输入：<code>127.0.0.1</code>，如下图所示：<br> <img src="http://wx3.sinaimg.cn/mw690/0060lm7Tly1ftu7y5qjwdj31kw0mt785.jpg" alt="blockchain" title="自定义文件预览图"></p>
 <h4 id="4-手机-其他电脑-访问本机服务器-1"><a href="#4-手机-其他电脑-访问本机服务器-1" class="headerlink" title="4- 手机/其他电脑 访问本机服务器"></a>4- 手机/其他电脑 访问本机服务器</h4><p>1、找到本机 IP 地址<br>打开 设置-网络，你可以看到下图红框的内容，即为本机的ip地址：<code>192.168.1.79</code><br> <img src="http://wx4.sinaimg.cn/mw690/0060lm7Tly1ftu89h3hlxj310q0uotcj.jpg" alt="blockchain" title="IP地址"></p>
 <p>2、在手机浏览器或则别的电脑里面输入之前的IP地址：<code>192.168.1.79</code>，即可访问到页面。</p>
-<p></p><p style="color:red">特别注意：</p><h2 style="color:red;text-align:center"> 一定加必须保证手机和其他电脑和本机在同一局域网 </h2><p></p>
+<p></p><p style="color:red">特别注意：</p> <h2 style="color:red;text-align:center"> 一定加必须保证手机和其他电脑和本机在同一局域网 </h2><p></p>
+<p>进阶部分</p>
+<h3 id="自定义服务器根路径"><a href="#自定义服务器根路径" class="headerlink" title=" 自定义服务器根路径"></a><em> 自定义服务器根路径</em></h3><p>  1、打开终端：<code>open /etc</code><br>  在打开的finder中找到apache2文件夹，这就是系统自带的apache目录。打开配置文件httpd.conf可以看到系统默认网站根目录是”/Library/WebServer/Documents“，我们要将它改为自己的路径。<br>  2、编辑器全局搜索：<code>DocumentRoot</code>,更改路径如下：<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># DocumentRoot &quot;/Library/WebServer/Documents&quot;</span><br><span class="line">DocumentRoot &quot;/Users/9s/sites&quot;</span><br><span class="line">&lt;Directory &quot;/Users/9s/sites&quot;&gt;</span><br></pre></td></tr></table></figure></p>
+<p>  这样做的好处方便以后的开发调试工作，容易找到自己的服务器目录。</p>
 
           
         
@@ -762,137 +765,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/26/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Haines Jiang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2799323574,1027469776&fm=27&gp=0.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haines Jiang">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/26/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T11:32:23+08:00">
-                2018-07-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-    <div>
-      
-    </div>
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -943,7 +815,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1015,7 +887,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count"><i class="fa fa-pencil"></i> total: 487 words</span>
+  <span class="post-count"><i class="fa fa-pencil"></i> total: 547 words</span>
 </div>
 
         
