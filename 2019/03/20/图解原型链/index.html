@@ -81,7 +81,7 @@
 
 
 
-  <meta name="keywords" content="Nginx,">
+  <meta name="keywords" content="Javascript,">
 
 
 
@@ -92,18 +92,21 @@
 
 
 
-<meta name="description" content="目录 基础部分   1234前言含义与作用代码演示字段解释    说明：赶紧开启gzip压缩吧。">
-<meta name="keywords" content="Nginx">
+<meta name="description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
+<meta name="keywords" content="Javascript">
 <meta property="og:type" content="article">
-<meta property="og:title" content="开启gzip压缩">
-<meta property="og:url" content="http://yoursite.com/2018/08/15/gzip/index.html">
+<meta property="og:title" content="图解原型链">
+<meta property="og:url" content="http://yoursite.com/2019/03/20/图解原型链/index.html">
 <meta property="og:site_name" content="Haines Jiang">
-<meta property="og:description" content="目录 基础部分   1234前言含义与作用代码演示字段解释    说明：赶紧开启gzip压缩吧。">
+<meta property="og:description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-05-18T07:30:00.726Z">
+<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/prototype.png">
+<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/prototype-process.png">
+<meta property="og:updated_time" content="2020-05-18T08:48:02.728Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="开启gzip压缩">
-<meta name="twitter:description" content="目录 基础部分   1234前言含义与作用代码演示字段解释    说明：赶紧开启gzip压缩吧。">
+<meta name="twitter:title" content="图解原型链">
+<meta name="twitter:description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
+<meta name="twitter:image" content="https://ipoodle.gitee.io/cdn/blog/prototype.png">
 
 
 
@@ -133,7 +136,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/08/15/gzip/">
+  <link rel="canonical" href="http://yoursite.com/2019/03/20/图解原型链/">
 
 
 
@@ -141,7 +144,7 @@
 
 
 
-  <title>开启gzip压缩 | Haines Jiang</title>
+  <title>图解原型链 | Haines Jiang</title>
   
 
 
@@ -268,7 +271,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/15/gzip/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/20/图解原型链/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Haines Jiang">
@@ -285,7 +288,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">开启gzip压缩</h1>
+          <h1 class="post-title" itemprop="name headline">图解原型链</h1>
         
 
         <div class="post-meta">
@@ -297,8 +300,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T15:09:22+08:00">
-                2018-08-15
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-20T17:10:12+08:00">
+                2019-03-20
               </time>
             
 
@@ -335,14 +338,46 @@
       
 
       
-        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p> 基础部分<br>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">前言</span><br><span class="line">含义与作用</span><br><span class="line">代码演示</span><br><span class="line">字段解释</span><br></pre></td></tr></table></figure></p>
-<p>   说明：赶紧开启gzip压缩吧。</p>
-<a id="more"></a>
-<h4 id="1-前言"><a href="#1-前言" class="headerlink" title="1- 前言"></a>1- 前言</h4><p> 前端的性能优化是一个永不停歇的路程，优化的方式也不一而足，今天重点不在于介绍性能优化，而是介绍性能优化的其中一种方式，通过压缩来节省http请求的流量，实现过程中依赖http中header部分的两个字段，Accept-Encoding和Content-EnCoding（分别来自request的header和response的header）。</p>
-<h4 id="2-含义与作用"><a href="#2-含义与作用" class="headerlink" title="2- 含义与作用"></a>2- 含义与作用</h4><p> 为什么首先要讲这两个字段的含义呢？因为当你打开一个页面时，请求到了服务端，如果请求上没有这种编码的标识的话，服务端是不知道该不该压缩？使用哪种方式压缩的？所以request请求header里的Accept-Encoding就是用来告诉服务端客户端是支持哪些编码方式的，一般的值有gzip/compress/deflate/br等，可以多个，中间用逗号隔开。如：</p>
-<p>  <code>Accept-Encoding: gzip, deflate, br</code><br> 综上，Accept-Encoding用来标识客户端能够理解的内容编码方式。 Content-Encoding用来标识主体进行了何种方式的内容编码转换。</p>
-<h4 id="3-代码演示"><a href="#3-代码演示" class="headerlink" title="3- 代码演示"></a>3- 代码演示</h4> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">gzip on;</span><br><span class="line">  gzip_min_length 1k;</span><br><span class="line">  gzip_buffers 4 16k;</span><br><span class="line">  #gzip_http_version 1.0;</span><br><span class="line">  gzip_comp_level 2;</span><br><span class="line">  gzip_types text/plain application/javascript application/x-javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;</span><br><span class="line">  gzip_vary off;</span><br><span class="line">  gzip_disable &quot;MSIE [1-6].&quot;;</span><br></pre></td></tr></table></figure>
-<h4 id="4-字段解释"><a href="#4-字段解释" class="headerlink" title="4- 字段解释"></a>4- 字段解释</h4>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 开启压缩  </span><br><span class="line">gzip  on;   </span><br><span class="line"># 设置允许压缩的页面最小字节数，页面字节数从header头得content-length中进行获取。默认值是0，不管页面多大都压缩。建议设置成大于2k的字节数，小于2k可能会越压越大。  </span><br><span class="line">gzip_min_length 2k;  </span><br><span class="line"># 设置系统获取几个单位的缓存用于存储gzip的压缩结果数据流。 例如 4 4k 代表以4k为单位，按照原始数据大小以4k为单位的4倍申请内存。 4 8k 代表以8k为单位，按照原始数据大小以8k为单位的4倍申请内存。  </span><br><span class="line"># 如果没有设置，默认值是申请跟原始数据相同大小的内存空间去存储gzip压缩结果。  </span><br><span class="line">gzip_buffers 4 16k;  </span><br><span class="line">#压缩级别，1-10，数字越大压缩的越好，也越占用CPU时间  </span><br><span class="line">gzip_comp_level 5;  </span><br><span class="line"># 默认值: gzip_types text/html (默认不对js/css文件进行压缩)  </span><br><span class="line"># 压缩类型，匹配MIME类型进行压缩  </span><br><span class="line"># 不能用通配符 text/*  </span><br><span class="line"># (无论是否指定)text/html默认已经压缩   </span><br><span class="line"># 设置哪压缩种文本文件可参考 conf/mime.types  </span><br><span class="line">gzip_types text/plain application/x-javascript text/css application/xml;    </span><br><span class="line"># 值为1.0和1.1 代表是否压缩http协议1.0，选择1.0则1.0和1.1都可以压缩  </span><br><span class="line">gzip_http_version 1.0   </span><br><span class="line"># IE6及以下禁止压缩  </span><br><span class="line">gzip_disable &quot;MSIE [1-6]\.&quot;;   </span><br><span class="line"># 默认值：off  </span><br><span class="line"># Nginx作为反向代理的时候启用，开启或者关闭后端服务器返回的结果，匹配的前提是后端服务器必须要返回包含&quot;Via&quot;的 header头。  </span><br><span class="line"># off - 关闭所有的代理结果数据的压缩  </span><br><span class="line"># expired - 启用压缩，如果header头中包含 &quot;Expires&quot; 头信息  </span><br><span class="line"># no-cache - 启用压缩，如果header头中包含 &quot;Cache-Control:no-cache&quot; 头信息  </span><br><span class="line"># no-store - 启用压缩，如果header头中包含 &quot;Cache-Control:no-store&quot; 头信息  </span><br><span class="line"># private - 启用压缩，如果header头中包含 &quot;Cache-Control:private&quot; 头信息  </span><br><span class="line"># no_last_modified - 启用压缩,如果header头中不包含 &quot;Last-Modified&quot; 头信息  </span><br><span class="line"># no_etag - 启用压缩 ,如果header头中不包含 &quot;ETag&quot; 头信息  </span><br><span class="line"># auth - 启用压缩 , 如果header头中包含 &quot;Authorization&quot; 头信息  </span><br><span class="line"># any - 无条件启用压缩  </span><br><span class="line">gzip_proxied expired no-cache no-store private auth;  </span><br><span class="line"># 给CDN和代理服务器使用，针对相同url，可以根据头信息返回压缩和非压缩副本  </span><br><span class="line">gzip_vary on;</span><br></pre></td></tr></table></figure>
+        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">基本概念</span><br><span class="line">new操作符干了哪几件事</span><br><span class="line">instanceof</span><br><span class="line">内存图的角度看原型链</span><br><span class="line">总结</span><br></pre></td></tr></table></figure>
+  <a id="more"></a>
+<p>  之前一直想整理下原型和原型链相关的知识点，无奈公司事情太忙，一直没有来得及整理，作为前端开发js基础的确很重要。<br>  自己也经常反思自身存在的知识盲点。本文从基本概念出发，再从内存图的角度来解释原型链查找的过程，觉得与口头表述原型链相比较而言，这样理解更为深刻，更有利于巩固自己的知识。</p>
+<h4 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1- 基本概念"></a>1- 基本概念</h4><ul>
+<li><p>原型对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">每一个函数都有prototype属性，它默认指向Object空对象（即称为原型对象）</span><br><span class="line">原型对象本身是一个普通对象，它具有constructor属性，指向其构造函数。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>原型对象存在的原因：为实例对象共享公共的属性和方法，避免浪费内存</p>
+</li>
+<li><p>函数对象与实例对象的区别:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">函数对象可以加括号调用，形如fn();而实例对象不可以，</span><br><span class="line">但两者作为普通对象而言，都可以打点访问设置自身的属性。形如obj.name,fn.name</span><br><span class="line">函数对象具有的是&quot;prototype&quot;属性，而实例对象具有的是&quot;__prototype__&quot;属性</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>显式原型对象和隐式原型对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以简单的理解成函数对象的prototype属性指向的是显式原型对象，实例对象的__prototype__属性指向的是隐式原型对象</span><br><span class="line">两者指向的是同一个内存地址:Fun.prototype === fun.__prototype__（构造函数的显式原型对象===当前构造函数实例对象的隐式原型对象）</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>构造函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">任何一个函数都可以作为构造函数，只要被new了，就称为构造函数</span><br><span class="line">只要定义了构造函数，那么这个函数自动具有prototype属性，会初始化一个原型对象，原型对象具有constructor属性指向其构造函数。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>实例对象:只要是对象，无论哪种方式生成，都叫实例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">var o1 = &#123;name:’o1’&#125;//Object&#123;name:’o1’&#125;</span><br><span class="line">var o11 = new Object( &#123;name:’o11’&#125;)//Object&#123;name:’o2’&#125;</span><br><span class="line"></span><br><span class="line">var M = function()&#123;this.name:’o2’&#125;</span><br><span class="line">var o2 = new M();//M&#123;name:’o3’&#125;</span><br><span class="line"></span><br><span class="line">var P = &#123;name:’o3’&#125;</span><br><span class="line">var o3 = Object.create(P)//Object&#123;&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>原型链：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">访问一个对象的属性时，先在自身属性中查找，找到返回</span><br><span class="line">如果没有, 再沿着__proto__这条链向上查找, 找到返回</span><br><span class="line">如果最终没找到, 返回undefined</span><br><span class="line">__proto__这条原型查找链就是原型链: 隐式原型链</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>作用域链和原型链：a.b，查找a的时候，a是变量，会沿着作用域链进行查找；查找b时，b是属性，会沿着原型链上面查找。</p>
+</li>
+</ul>
+<h4 id="2-new操作符干了哪几件事"><a href="#2-new操作符干了哪几件事" class="headerlink" title="2- new操作符干了哪几件事"></a>2- new操作符干了哪几件事</h4><ul>
+<li>一个新的空对象被创建，它继承了foo.prototype</li>
+<li>构造函数foo会被执行，同时this会指向这个新实例</li>
+<li>若构造函数返回一个对象，那么这个对象会取代new出来的结果。反之，为1空对象。</li>
+</ul>
+<h4 id="3-instanceof"><a href="#3-instanceof" class="headerlink" title="3- instanceof"></a>3- instanceof</h4><ul>
+<li>表达式: A instanceof B</li>
+<li>如果B函数的显式原型对象在A对象的原型链上, 返回true, 否则返回false</li>
+</ul>
+<h4 id="4-图解原型链"><a href="#4-图解原型链" class="headerlink" title="4- 图解原型链"></a>4- 图解原型链</h4><p>  <img src="https://ipoodle.gitee.io/cdn/blog/prototype.png" alt="blockchain" title=" 代码演示"><br>  <img src="https://ipoodle.gitee.io/cdn/blog/prototype-process.png" alt="blockchain" title=" 内存图的角度看原型链"><br>  1.代码中含有构造函数Object，Foo以及实例对象foo，它们都是对象，属于引用数据类型，在栈中分别储存了对应的指针，该指针实际上是指向对应堆内存的引用地址。<br>  2.foo.test1();foo堆内存中地址0x567，先从自身查找test1()方法，发现自身有，查找结束。<br>  3.foo.test2();foo堆内存中地址0x567，先从自身查找test2()方法，查找发现没有，会继续沿着原型链 <code>__prototype__</code>向上查找，但是<code>foo.__prototype__</code>指向哪里呢？由于<code>foo.__prototype__</code>===<code>Foo.prototype</code>，且<code>Foo.prototype</code>引用地址0x456,所以<code>foo.__prototype__</code>会指向0x456发现有，查找结束。<br>  4.同理，foo.toString();会从<code>foo.__prototype__.__prototype__</code>查找到Object对象上，toString()为其内置方法，查询结束。</p>
+<h4 id="5-总结"><a href="#5-总结" class="headerlink" title="5- 总结"></a>5- 总结</h4><p>  个人觉得原型对象，构造函数（即函数对象），实例对象，原型链这些概念首先要理解清楚，不能搞混了，然后想办法找到它们之间的内在联系，再想办法画下它们之间的关系图，加深理解和记忆。</p>
 
       
     </div>
@@ -370,7 +405,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Nginx/" rel="tag"><i class="fa fa-tag"></i> Nginx</a>
+            <a href="/tags/Javascript/" rel="tag"><i class="fa fa-tag"></i> Javascript</a>
           
         </div>
       
@@ -383,8 +418,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/08/12/React入门基础/" rel="next" title="React入门基础">
-                <i class="fa fa-chevron-left"></i> React入门基础
+              <a href="/2018/08/15/gzip/" rel="next" title="开启gzip压缩">
+                <i class="fa fa-chevron-left"></i> 开启gzip压缩
               </a>
             
           </div>
@@ -392,10 +427,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/03/20/图解原型链/" rel="prev" title="图解原型链">
-                图解原型链 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -520,7 +551,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-前言"><span class="nav-number">1.0.1.</span> <span class="nav-text">1- 前言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-含义与作用"><span class="nav-number">1.0.2.</span> <span class="nav-text">2- 含义与作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-代码演示"><span class="nav-number">1.0.3.</span> <span class="nav-text">3- 代码演示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-字段解释"><span class="nav-number">1.0.4.</span> <span class="nav-text">4- 字段解释</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-基本概念"><span class="nav-number">1.0.1.</span> <span class="nav-text">1- 基本概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-new操作符干了哪几件事"><span class="nav-number">1.0.2.</span> <span class="nav-text">2- new操作符干了哪几件事</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-instanceof"><span class="nav-number">1.0.3.</span> <span class="nav-text">3- instanceof</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-图解原型链"><span class="nav-number">1.0.4.</span> <span class="nav-text">4- 图解原型链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-总结"><span class="nav-number">1.0.5.</span> <span class="nav-text">5- 总结</span></a></li></ol></li></ol></div>
             
 
           </div>
