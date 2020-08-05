@@ -81,7 +81,7 @@
 
 
 
-  <meta name="keywords" content="Javascript,">
+  <meta name="keywords" content="JavaScript,">
 
 
 
@@ -92,21 +92,21 @@
 
 
 
-<meta name="description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
-<meta name="keywords" content="Javascript">
+<meta name="description" content="目录   123456单线程任务队列EventLoop关于setTimeout与setInterval关于Promise和process.nextTick(callback)总结">
+<meta name="keywords" content="JavaScript">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Javascript执行机制">
+<meta property="og:title" content="JavaScript执行机制">
 <meta property="og:url" content="http://yoursite.com/2020/07/15/JS运行机制/index.html">
 <meta property="og:site_name" content="Haines Jiang">
-<meta property="og:description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
+<meta property="og:description" content="目录   123456单线程任务队列EventLoop关于setTimeout与setInterval关于Promise和process.nextTick(callback)总结">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/prototype.png">
-<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/prototype-process.png">
-<meta property="og:updated_time" content="2020-08-05T03:25:22.785Z">
+<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/eventloop1.png">
+<meta property="og:image" content="https://ipoodle.gitee.io/cdn/blog/eventloop2.png">
+<meta property="og:updated_time" content="2020-08-05T08:05:30.769Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Javascript执行机制">
-<meta name="twitter:description" content="目录   12345基本概念new操作符干了哪几件事instanceof内存图的角度看原型链总结">
-<meta name="twitter:image" content="https://ipoodle.gitee.io/cdn/blog/prototype.png">
+<meta name="twitter:title" content="JavaScript执行机制">
+<meta name="twitter:description" content="目录   123456单线程任务队列EventLoop关于setTimeout与setInterval关于Promise和process.nextTick(callback)总结">
+<meta name="twitter:image" content="https://ipoodle.gitee.io/cdn/blog/eventloop1.png">
 
 
 
@@ -144,7 +144,7 @@
 
 
 
-  <title>Javascript执行机制 | Haines Jiang</title>
+  <title>JavaScript执行机制 | Haines Jiang</title>
   
 
 
@@ -288,7 +288,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Javascript执行机制</h1>
+          <h1 class="post-title" itemprop="name headline">JavaScript执行机制</h1>
         
 
         <div class="post-meta">
@@ -338,46 +338,120 @@
       
 
       
-        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">基本概念</span><br><span class="line">new操作符干了哪几件事</span><br><span class="line">instanceof</span><br><span class="line">内存图的角度看原型链</span><br><span class="line">总结</span><br></pre></td></tr></table></figure>
+        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">单线程</span><br><span class="line">任务队列</span><br><span class="line">EventLoop</span><br><span class="line">关于setTimeout与setInterval</span><br><span class="line">关于Promise和process.nextTick(callback)</span><br><span class="line">总结</span><br></pre></td></tr></table></figure>
   <a id="more"></a>
 <p>  对于JavaScript执行机制，之前也学习过，上班也时不时听见同事说事件循环，任务队列这些词，但是一直没有来得及进行系统总结，今天花点时间整理下。</p>
-<h4 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1- 基本概念"></a>1- 基本概念</h4><ul>
-<li><p>原型对象：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">每一个函数都有prototype属性，它默认指向Object空对象（即称为原型对象）</span><br><span class="line">原型对象本身是一个普通对象，它具有constructor属性，指向其构造函数。</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>原型对象存在的原因：为实例对象共享公共的属性和方法，避免浪费内存</p>
-</li>
-<li><p>函数对象与实例对象的区别:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">函数对象可以加括号调用，形如fn();而实例对象不可以，</span><br><span class="line">但两者作为普通对象而言，都可以打点访问设置自身的属性。形如obj.name,fn.name</span><br><span class="line">函数对象具有的是&quot;prototype&quot;属性，而实例对象具有的是&quot;__prototype__&quot;属性</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>显式原型对象和隐式原型对象：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">可以简单的理解成函数对象的prototype属性指向的是显式原型对象，实例对象的__prototype__属性指向的是隐式原型对象</span><br><span class="line">两者指向的是同一个内存地址:Fun.prototype === fun.__prototype__（构造函数的显式原型对象===当前构造函数实例对象的隐式原型对象）</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>构造函数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">任何一个函数都可以作为构造函数，只要被new了，就称为构造函数</span><br><span class="line">只要定义了构造函数，那么这个函数自动具有prototype属性，会初始化一个原型对象，原型对象具有constructor属性指向其构造函数。</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>实例对象:只要是对象，无论哪种方式生成，都叫实例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">var o1 = &#123;name:’o1’&#125;//Object&#123;name:’o1’&#125;</span><br><span class="line">var o11 = new Object( &#123;name:’o11’&#125;)//Object&#123;name:’o2’&#125;</span><br><span class="line"></span><br><span class="line">var M = function()&#123;this.name:’o2’&#125;</span><br><span class="line">var o2 = new M();//M&#123;name:’o3’&#125;</span><br><span class="line"></span><br><span class="line">var P = &#123;name:’o3’&#125;</span><br><span class="line">var o3 = Object.create(P)//Object&#123;&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
+<h4 id="1-单线程"><a href="#1-单线程" class="headerlink" title="1. 单线程"></a>1. 单线程</h4><blockquote>
+<p>JavaScript是一门单线程的语言，所谓单线程就是同一个时间段只能做一件事。举例来说就好比银行有一个窗口办理业务，你想办理业务的话，就需要排队，你要等着在你前面的人都办理好了，才能轮到你。</p>
+</blockquote>
+<h4 id="2-任务队列"><a href="#2-任务队列" class="headerlink" title="2. 任务队列"></a>2. 任务队列</h4><blockquote>
+<p>包含同步任务和异步任务 </p>
+</blockquote>
+<h4 id="3-EventLoop"><a href="#3-EventLoop" class="headerlink" title="3. EventLoop"></a>3. EventLoop</h4><blockquote>
+<p>执行栈与任务队列之间的来回搬运。执行栈会执行同步任务，执行完后，会向任务队列里面搬运异步任务放入执行栈里面执行，执行完成后，会继续向任务队列搬运下一个异步任务，如此循环下去，就是事件循环。</p>
+</blockquote>
+<p>  <img src="https://ipoodle.gitee.io/cdn/blog/eventloop1.png" alt="blockchain" title=" 导图演示"><br>导图要表达的内容用文字来表述的话：</p>
 <ul>
-<li><p>原型链：</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">访问一个对象的属性时，先在自身属性中查找，找到返回</span><br><span class="line">如果没有, 再沿着__proto__这条链向上查找, 找到返回</span><br><span class="line">如果最终没找到, 返回undefined</span><br><span class="line">__proto__这条原型查找链就是原型链: 隐式原型链</span><br></pre></td></tr></table></figure>
+<li>同步和异步任务分别进入不同的执行”场所”，同步的进入主线程，异步的进入Event Table并注册函数。</li>
+<li>当指定的事情完成时，Event Table会将这个函数移入Event Queue。</li>
+<li>主线程内的任务执行完毕为空，会去Event Queue读取对应的函数，进入主线程执行。</li>
+<li>上述过程会不断重复，也就是常说的Event Loop(事件循环)。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let data = [];</span><br><span class="line"> $.ajax(&#123;</span><br><span class="line">     url:www.baidu.com,</span><br><span class="line">     data:data,</span><br><span class="line">     success:() =&gt; &#123;</span><br><span class="line">         console.log(&apos;发送成功!&apos;);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;)</span><br><span class="line"> console.log(&apos;代码执行结束&apos;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>ajax进入Event Table，注册回调函数success。</li>
+<li>执行console.log(‘代码执行结束’)。</li>
+<li>ajax事件完成，回调函数success进入Event Queue。</li>
+<li>主线程从Event Queue读取回调函数success并执行。<br></li>
+</ul>
+<p>相信通过上面的文字和代码，你已经对js的执行顺序有了初步了解。接下来我们来研究进阶话题：setTimeout。</p>
+<h4 id="4-关于setTimeout与setInterval"><a href="#4-关于setTimeout与setInterval" class="headerlink" title="4. 关于setTimeout与setInterval"></a>4. 关于setTimeout与setInterval</h4><p>先看一个例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(() =&gt; &#123;</span><br><span class="line">    task();</span><br><span class="line">&#125;,3000)</span><br><span class="line">console.log(&apos;执行console&apos;);</span><br></pre></td></tr></table></figure></p>
+<p>根据前面我们的结论，setTimeout是异步的，应该先执行console.log这个同步任务，所以我们的结论是：</p>
+<blockquote>
+<p> 1.执行console <br><br>   2.执行task() </p>
+</blockquote>
+<p>然后我们修改一下前面的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(() =&gt; &#123;</span><br><span class="line">    task()</span><br><span class="line">&#125;,3000)</span><br><span class="line"></span><br><span class="line">wait(10000000) //wait函数需要很久才能执行完</span><br></pre></td></tr></table></figure>
+<p>乍一看其实差不多嘛，但我们把这段代码在chrome执行一下，却发现控制台执行task()需要的时间远远超过3秒，说好的延时三秒，为啥现在需要这么长时间啊？</p>
+<p>这时候我们需要重新理解setTimeout的定义。我们先说上述代码是怎么执行的：</p>
+<ul>
+<li>task()进入Event Table并注册,计时开始。</li>
+<li>执行wait函数，很慢，非常慢，计时仍在继续。</li>
+<li>3秒到了，计时事件timeout完成，task()进入Event Queue，但是sleep也太慢了吧，还没执行完，只好等着。</li>
+<li>wait函数终于执行完了，task()终于从Event Queue进入了主线程执行。</li>
+</ul>
+<p>上述的流程走完，我们知道setTimeout这个函数，是经过指定时间后，把要执行的任务(本例中为task())加入到Event Queue中，又因为是单线程任务要一个一个执行，如果前面的任务需要的时间太久，那么只能等着，导致真正的延迟时间远远大于3秒。<br>我们还经常遇到setTimeout(fn,0)这样的代码，0秒后执行又是什么意思呢？是不是可以立即执行呢？<br>答案是不会的，setTimeout(fn,0)的含义是，指定某个任务在主线程最早可得的空闲时间执行，意思就是不用再等多少秒了，只要主线程执行栈内的同步任务全部执行完成，栈为空就马上执行。</p>
+<blockquote>
+<p>上面说完了setTimeout，当然不能错过它的孪生兄弟setInterval。他俩差不多，只不过后者是循环的执行。对于执行顺序来说，setInterval会每隔指定的时间将注册的函数置入Event Queue，如果前面的任务耗时太久，那么同样需要等待。<br>  唯一需要注意的一点是，对于setInterval(fn,ms)来说，我们已经知道不是每过ms秒会执行一次fn，而是每过ms秒，会有fn进入Event Queue。一旦setInterval的回调函数fn执行时间超过了延迟时间ms，那么就完全看不出来有时间间隔了。这句话请读者仔细品味。</p>
+</blockquote>
+<h4 id="5-关于Promise和process-nextTick-callback"><a href="#5-关于Promise和process-nextTick-callback" class="headerlink" title="5. 关于Promise和process.nextTick(callback)"></a>5. 关于Promise和process.nextTick(callback)</h4><ul>
+<li>Promise是异步编程的一个解决方案 <br></li>
+<li>process.nextTick(callback)类似node.js版的”setTimeout”，在事件循环的下一次循环中调用 callback 回调函数。</li>
+</ul>
+<blockquote>
+<p>任务从广义上分为同步任务和异步任务，其更细致的划分便是：宏任务和微任务。<br>宏任务和微任务都存在于事件队列里面</p>
+</blockquote>
+<ul>
+<li>macro-task(宏任务)：包括整体代码script，setTimeout，setInterval</li>
+<li>micro-task(微任务)：Promise，process.nextTick</li>
+</ul>
+<p>不同类型的任务会进入对应的Event Queue，比如setTimeout和setInterval会进入相同的Event Queue。<br>事件循环的顺序，决定js代码的执行顺序。进入整体代码(宏任务)后，开始第一次循环。接着执行所有的微任务。然后再次从宏任务开始，找到其中一个任务队列执行完毕，再执行所有的微任务。听起来有点绕，我们用文章最开始的一段代码说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(function() &#123;</span><br><span class="line">      console.log(&apos;setTimeout&apos;);</span><br><span class="line">  &#125;)</span><br><span class="line">  </span><br><span class="line">new Promise(function(resolve) &#123;</span><br><span class="line">      console.log(&apos;promise&apos;);</span><br><span class="line">  &#125;).then(function() &#123;</span><br><span class="line">      console.log(&apos;then&apos;);</span><br><span class="line">  &#125;)</span><br><span class="line">  </span><br><span class="line">console.log(&apos;console&apos;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这段代码作为宏任务，进入主线程。</li>
+<li>先遇到setTimeout，那么将其回调函数注册后分发到宏任务Event Queue。(注册过程与上同，下文不再描述)</li>
+<li>接下来遇到了Promise，new Promise立即执行，then函数分发到微任务Event Queue。</li>
+<li>遇到console.log()，立即执行。</li>
+<li>至此，整体代码script作为第一个宏任务执行结束，看看有哪些微任务？我们发现了then在微任务Event Queue里面，执行。</li>
+<li>ok，第一轮事件循环结束了，我们开始第二轮循环，当然要从宏任务Event Queue开始。我们发现了宏任务Event Queue中setTimeout对应的回调函数，立即执行。</li>
+<li>结束。</li>
+</ul>
+<p>事件循环，宏任务，微任务的关系如图所示：<br><img src="https://ipoodle.gitee.io/cdn/blog/eventloop2.png" alt="blockchain" title="关系图"> </p>
+<p>我们来分析一段较复杂的代码，看看你是否真的掌握了js的执行机制：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">console.log(&apos;1&apos;);</span><br><span class="line"></span><br><span class="line">setTimeout(function() &#123;</span><br><span class="line">    console.log(&apos;2&apos;);</span><br><span class="line">    process.nextTick(function() &#123;</span><br><span class="line">        console.log(&apos;3&apos;);</span><br><span class="line">    &#125;)</span><br><span class="line">    new Promise(function(resolve) &#123;</span><br><span class="line">        console.log(&apos;4&apos;);</span><br><span class="line">        resolve();</span><br><span class="line">    &#125;).then(function() &#123;</span><br><span class="line">        console.log(&apos;5&apos;)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br><span class="line">process.nextTick(function() &#123;</span><br><span class="line">    console.log(&apos;6&apos;);</span><br><span class="line">&#125;)</span><br><span class="line">new Promise(function(resolve) &#123;</span><br><span class="line">    console.log(&apos;7&apos;);</span><br><span class="line">    resolve();</span><br><span class="line">&#125;).then(function() &#123;</span><br><span class="line">    console.log(&apos;8&apos;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">setTimeout(function() &#123;</span><br><span class="line">    console.log(&apos;9&apos;);</span><br><span class="line">    process.nextTick(function() &#123;</span><br><span class="line">        console.log(&apos;10&apos;);</span><br><span class="line">    &#125;)</span><br><span class="line">    new Promise(function(resolve) &#123;</span><br><span class="line">        console.log(&apos;11&apos;);</span><br><span class="line">        resolve();</span><br><span class="line">    &#125;).then(function() &#123;</span><br><span class="line">        console.log(&apos;12&apos;)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>第一轮事件循环流程分析如下：</p>
+<ul>
+<li>整体script作为第一个宏任务进入主线程，遇到console.log，输出1。</li>
+<li>遇到setTimeout，其回调函数被分发到宏任务Event Queue中。我们暂且记为setTimeout1。</li>
+<li>遇到process.nextTick()，其回调函数被分发到微任务Event Queue中。我们记为process1。</li>
+<li>遇到Promise，new Promise直接执行，输出7。then被分发到微任务Event Queue中。我们记为then1。</li>
+<li>又遇到了setTimeout，其回调函数被分发到宏任务Event Queue中，我们记为setTimeout2。<blockquote>
+<p>宏任务: setTimeout1, setTimeout2 <br><br>微任务: process1, then1 </p>
+</blockquote>
 </li>
-<li><p>作用域链和原型链：a.b，查找a的时候，a是变量，会沿着作用域链进行查找；查找b时，b是属性，会沿着原型链上面查找。</p>
+<li>第一轮事件循环宏任务结束时各Event Queue的情况，此时已经输出了1和7。</li>
+<li>我们发现了process1和then1两个微任务。</li>
+<li>执行process1,输出6。</li>
+<li>执行then1，输出8。</li>
+</ul>
+<p>好了，第一轮事件循环正式结束，这一轮的结果是输出1，7，6，8。那么第二轮时间循环从setTimeout1宏任务开始：</p>
+<ul>
+<li>首先输出2。接下来遇到了process.nextTick()，同样将其分发到微任务Event Queue中，记为process2。new Promise立即执行输出4，then也分发到微任务Event Queue中，记为then2。<blockquote>
+<p>宏任务: setTimeout2 <br><br>微任务: process2, then2</p>
+</blockquote>
 </li>
+<li>第二轮事件循环宏任务结束，我们发现有process2和then2两个微任务可以执行。</li>
+<li>输出3。</li>
+<li>输出5。</li>
+<li>第二轮事件循环结束，第二轮输出2，4，3，5。</li>
+<li>第三轮事件循环开始，此时只剩setTimeout2了，执行。</li>
+<li>直接输出9。</li>
+<li>将process.nextTick()分发到微任务Event Queue中。记为process3。</li>
+<li>直接执行new Promise，输出11。</li>
+<li>将then分发到微任务Event Queue中，记为then3。<blockquote>
+<p>宏任务: 无 <br><br>微任务: process3, then3</p>
+</blockquote>
+</li>
+<li>第三轮事件循环宏任务执行结束，执行两个微任务process3和then3。</li>
+<li>输出10。</li>
+<li>输出12。</li>
+<li>第三轮事件循环结束，第三轮输出9，11，10，12。<br>整段代码，共进行了三次事件循环，完整的输出为1，7，6，8，2，4，3，5，9，11，10，12。</li>
 </ul>
-<h4 id="2-new操作符干了哪几件事"><a href="#2-new操作符干了哪几件事" class="headerlink" title="2- new操作符干了哪几件事"></a>2- new操作符干了哪几件事</h4><ul>
-<li>一个新的空对象被创建，它继承了foo.prototype</li>
-<li>构造函数foo会被执行，同时this会指向这个新实例</li>
-<li>若构造函数返回一个对象，那么这个对象会取代new出来的结果。反之，为1空对象。</li>
+<h4 id="6-总结"><a href="#6-总结" class="headerlink" title="6- 总结"></a>6- 总结</h4><ul>
+<li>首先JS是单线程的，一个时间点只能干一件事</li>
+<li>JS语句有的是同步的，有的是异步的，要先执行同步代码，同步的执行完了再去执行异步的</li>
+<li>要先从一个宏任务开始执行，再去执行里面的微任务，此为一轮事件循环，然后进入下一轮。</li>
 </ul>
-<h4 id="3-instanceof"><a href="#3-instanceof" class="headerlink" title="3- instanceof"></a>3- instanceof</h4><ul>
-<li>表达式: A instanceof B</li>
-<li>如果B函数的显式原型对象在A对象的原型链上, 返回true, 否则返回false</li>
-</ul>
-<h4 id="4-图解原型链"><a href="#4-图解原型链" class="headerlink" title="4- 图解原型链"></a>4- 图解原型链</h4><p>  <img src="https://ipoodle.gitee.io/cdn/blog/prototype.png" alt="blockchain" title=" 代码演示"><br>  <img src="https://ipoodle.gitee.io/cdn/blog/prototype-process.png" alt="blockchain" title=" 内存图的角度看原型链"><br>  1.代码中含有构造函数Object，Foo以及实例对象foo，它们都是对象，属于引用数据类型，在栈中分别储存了对应的指针，该指针实际上是指向对应堆内存的引用地址。<br>  2.foo.test1();foo堆内存中地址0x567，先从自身查找test1()方法，发现自身有，查找结束。<br>  3.foo.test2();foo堆内存中地址0x567，先从自身查找test2()方法，查找发现没有，会继续沿着原型链 <code>__prototype__</code>向上查找，但是<code>foo.__prototype__</code>指向哪里呢？由于<code>foo.__prototype__</code>===<code>Foo.prototype</code>，且<code>Foo.prototype</code>引用地址0x456,所以<code>foo.__prototype__</code>会指向0x456发现有，查找结束。<br>  4.同理，foo.toString();会从<code>foo.__prototype__.__prototype__</code>查找到Object对象上，toString()为其内置方法，查询结束。</p>
-<h4 id="5-总结"><a href="#5-总结" class="headerlink" title="5- 总结"></a>5- 总结</h4><p>  个人觉得原型对象，构造函数（即函数对象），实例对象，原型链这些概念首先要理解清楚，不能搞混了，然后想办法找到它们之间的内在联系，再想办法画下它们之间的关系图，加深理解和记忆。</p>
 
       
     </div>
@@ -405,7 +479,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Javascript/" rel="tag"><i class="fa fa-tag"></i> Javascript</a>
+            <a href="/tags/JavaScript/" rel="tag"><i class="fa fa-tag"></i> JavaScript</a>
           
         </div>
       
@@ -551,7 +625,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-基本概念"><span class="nav-number">1.0.1.</span> <span class="nav-text">1- 基本概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-new操作符干了哪几件事"><span class="nav-number">1.0.2.</span> <span class="nav-text">2- new操作符干了哪几件事</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-instanceof"><span class="nav-number">1.0.3.</span> <span class="nav-text">3- instanceof</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-图解原型链"><span class="nav-number">1.0.4.</span> <span class="nav-text">4- 图解原型链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-总结"><span class="nav-number">1.0.5.</span> <span class="nav-text">5- 总结</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-单线程"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. 单线程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-任务队列"><span class="nav-number">1.0.2.</span> <span class="nav-text">2. 任务队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-EventLoop"><span class="nav-number">1.0.3.</span> <span class="nav-text">3. EventLoop</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-关于setTimeout与setInterval"><span class="nav-number">1.0.4.</span> <span class="nav-text">4. 关于setTimeout与setInterval</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-关于Promise和process-nextTick-callback"><span class="nav-number">1.0.5.</span> <span class="nav-text">5. 关于Promise和process.nextTick(callback)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-总结"><span class="nav-number">1.0.6.</span> <span class="nav-text">6- 总结</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -602,7 +676,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count"><i class="fa fa-pencil"></i> total: 7.2k words</span>
+  <span class="post-count"><i class="fa fa-pencil"></i> total: 8.6k words</span>
 </div>
 
         
